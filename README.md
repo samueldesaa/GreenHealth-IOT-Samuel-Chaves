@@ -219,7 +219,7 @@ git clone https://github.com/seu-usuario/greenhealth-iot.git
 Abra o arquivo na Arduino IDE:
 
 ```txt
-codigo/greenhealth_iot.ino
+Teste3SensoresHumLDR\Teste3SensoresHumLDR.ino
 ```
 
 ### 3. Instalar as bibliotecas necessárias
