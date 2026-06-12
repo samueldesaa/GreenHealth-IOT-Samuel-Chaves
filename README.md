@@ -328,6 +328,12 @@ Projeto acadêmico desenvolvido no curso de **Sistemas de Informação**, com fo
 
 ## 📄 Licença
 
-Este projeto é de uso acadêmico e experimental.
+Este projeto possui licença restritiva de uso.
 
-Sinta-se livre para estudar, adaptar e evoluir a ideia. 🌱
+O código, a documentação, a interface, os diagramas e demais arquivos estão protegidos por direitos autorais e pertencem a **Samuel Chaves de Sá**.
+
+É permitido visualizar este repositório apenas para fins de avaliação acadêmica, estudo pessoal e consulta.
+
+Não é permitido copiar, redistribuir, modificar, publicar versões derivadas ou utilizar este projeto para fins comerciais sem autorização prévia do autor.
+
+Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
