@@ -1,7 +1,5 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <HTTPClient.h>
-#include <WiFiClientSecure.h>
 #include <Wire.h>
 #include "DHT.h"
 #include "RTClib.h"
@@ -16,9 +14,6 @@ const int MQTT_PORT = 1883;
 
 const char* MQTT_CLIENT_ID = "esp32_greenhealth_samuel_001";
 
-// ================= API DE HORÁRIO =================
-const char* TIME_API_URL = "https://timeapi.io/api/TimeZone/zone?timeZone=America/Fortaleza";
-
 // ================= TÓPICOS GERAIS =================
 const char* TOPICO_TEMPERATURA = "greenhealth/sensores/temperatura";
 const char* TOPICO_UMIDADE_AR = "greenhealth/sensores/umidade_ar";
@@ -30,14 +25,19 @@ WiFiClient espClient;
 PubSubClient mqtt(espClient);
 
 // ================= DHT =================
-#define DHTPIN 27
-#define DHTTYPE DHT22
+#define DHTPIN 5
+#define DHTTYPE DHT11
 
 DHT dht(DHTPIN, DHTTYPE);
 
+// ================= LED RGB =================
+#define LED_R 16
+#define LED_G 17
+#define LED_B 18
+
 // ================= RTC =================
-#define RTC_SDA 26
-#define RTC_SCL 25
+#define RTC_SDA 19
+#define RTC_SCL 21
 #define RTC_ADDRESS 0x68
 
 RTC_DS3231 rtc;
@@ -131,6 +131,7 @@ void conectarMQTT() {
     } else {
       Serial.print("falhou. Estado: ");
       Serial.println(mqtt.state());
+      ledVermelho();
       delay(2000);
     }
   }
@@ -213,8 +214,7 @@ String formatarDataHoraRTC(DateTime agora) {
     agora.year(),
     agora.hour(),
     agora.minute(),
-    agora.second()
-  );
+    agora.second());
 
   return String(dataHora);
 }
@@ -222,151 +222,28 @@ String formatarDataHoraRTC(DateTime agora) {
 // ================= CONFIGURAR RTC =================
 void configurarRTC() {
   Wire.begin(RTC_SDA, RTC_SCL);
-  delay(100);
-
-  if (rtc.begin() && verificarRtcI2C()) {
-    rtcDetectado = true;
-    Serial.println("RTC DS3231 identificado.");
-
-    if (rtc.lostPower()) {
-      Serial.println("RTC perdeu energia. Ajustando com data/hora da compilação.");
-      rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    }
-  } else {
+  Serial.println("Inicializando RTC...");
+  if (!verificarRtcI2C()) {
     rtcDetectado = false;
-    Serial.println("RTC não identificado. O sistema usará a API de horário.");
+    Serial.println("ERRO: DS3231 nao encontrado.");
+    return;
   }
+  if (!rtc.begin()) {
+    rtcDetectado = false;
+    Serial.println("ERRO: Falha ao iniciar DS3231.");
+    return;
+  }
+  rtcDetectado = true;
+  if (rtc.lostPower()) rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 }
 
-// ================= EXTRAIR CAMPO SIMPLES DO JSON DA API =================
-String extrairCampoJson(String json, String campo) {
-  String chave = "\"" + campo + "\":\"";
-  int inicio = json.indexOf(chave);
-
-  if (inicio == -1) {
-    return "";
-  }
-
-  inicio += chave.length();
-
-  int fim = json.indexOf("\"", inicio);
-
-  if (fim == -1) {
-    return "";
-  }
-
-  return json.substring(inicio, fim);
-}
-
-// ================= FORMATAR DATA DA API =================
-String formatarDataHoraApi(String dataHoraApi) {
-  if (dataHoraApi.length() == 0) {
-    return "horario_indisponivel";
-  }
-
-  dataHoraApi.replace("T", " ");
-
-  if (dataHoraApi.length() >= 19) {
-    dataHoraApi = dataHoraApi.substring(0, 19);
-  }
-
-  if (dataHoraApi.length() >= 19) {
-    String ano = dataHoraApi.substring(0, 4);
-    String mes = dataHoraApi.substring(5, 7);
-    String dia = dataHoraApi.substring(8, 10);
-    String hora = dataHoraApi.substring(11, 19);
-
-    return dia + "/" + mes + "/" + ano + " " + hora;
-  }
-
-  return dataHoraApi;
-}
-
-// ================= OBTER DATA E HORA POR API =================
-String obterDataHoraAPI() {
-  if (WiFi.status() != WL_CONNECTED) {
-    return "wifi_desconectado";
-  }
-
-  WiFiClientSecure client;
-  client.setInsecure();
-
-  HTTPClient http;
-  http.setTimeout(5000);
-
-  Serial.println("Buscando horário pela API...");
-
-  if (!http.begin(client, TIME_API_URL)) {
-    Serial.println("Erro ao iniciar conexão com API de horário.");
-    return "erro_api";
-  }
-
-  int codigoHttp = http.GET();
-
-  if (codigoHttp != 200) {
-    Serial.print("Erro na API de horário. Código HTTP: ");
-    Serial.println(codigoHttp);
-
-    http.end();
-    return "erro_api";
-  }
-
-  String resposta = http.getString();
-  http.end();
-
-  String dataHora = extrairCampoJson(resposta, "currentLocalTime");
-
-  if (dataHora == "") {
-    dataHora = extrairCampoJson(resposta, "dateTime");
-  }
-
-  if (dataHora == "") {
-    dataHora = extrairCampoJson(resposta, "datetime");
-  }
-
-  dataHora = formatarDataHoraApi(dataHora);
-
-  Serial.print("Horário obtido pela API: ");
-  Serial.println(dataHora);
-
-  return dataHora;
-}
-
-// ================= OBTER DATA E HORA PRINCIPAL =================
-// Primeiro tenta RTC.
-// Se o RTC não for identificado ou parar de responder, usa API.
 String obterDataHora() {
-  if (rtcDetectado && verificarRtcI2C()) {
-    DateTime agora = rtc.now();
-    String dataHoraRTC = formatarDataHoraRTC(agora);
-
-    Serial.print("Horário obtido pelo RTC: ");
-    Serial.println(dataHoraRTC);
-
-    return dataHoraRTC;
+  if (!rtcDetectado) return "RTC_INDISPONIVEL";
+  if (!verificarRtcI2C()) {
+    rtcDetectado = false;
+    return "RTC_DESCONECTADO";
   }
-
-  if (rtcDetectado) {
-    Serial.println("RTC parou de responder. Alternando para API.");
-  }
-
-  rtcDetectado = false;
-
-  // Tenta detectar novamente o RTC, caso ele tenha voltado
-  if (rtc.begin() && verificarRtcI2C()) {
-    rtcDetectado = true;
-    Serial.println("RTC detectado novamente. Voltando a usar RTC.");
-
-    DateTime agora = rtc.now();
-    String dataHoraRTC = formatarDataHoraRTC(agora);
-
-    Serial.print("Horário obtido pelo RTC: ");
-    Serial.println(dataHoraRTC);
-
-    return dataHoraRTC;
-  }
-
-  return obterDataHoraAPI();
+  return formatarDataHoraRTC(rtc.now());
 }
 
 // ================= PUBLICAR DADOS DAS PLANTAS =================
@@ -412,9 +289,54 @@ String montarJsonPlantas() {
   return jsonPlantas;
 }
 
+
+// ================= LED RGB =================
+void setLed(bool r, bool g, bool b) {
+  digitalWrite(LED_R, r);
+  digitalWrite(LED_G, g);
+  digitalWrite(LED_B, b);
+}
+void ledAzul() {
+  setLed(0, 0, 1);
+}
+void ledAmarelo() {
+  setLed(1, 1, 0);
+}
+void ledCiano() {
+  setLed(0, 1, 1);
+}
+void ledRoxo() {
+  setLed(1, 0, 1);
+}
+void ledVerde() {
+  setLed(0, 1, 0);
+}
+void ledVermelho() {
+  setLed(1, 0, 0);
+}
+void ledBranco() {
+  setLed(1, 1, 1);
+}
+void atualizarStatusLed(bool sensorOk) {
+
+  if (!mqtt.connected()) {
+    // MQTT desconectado
+    ledVermelho();
+  } else if (!sensorOk) {
+    // DHT com erro
+    ledAmarelo();
+  } else {
+    // Sistema funcionando normalmente
+    ledVerde();
+  }
+}
+
 // ================= SETUP =================
 void setup() {
   Serial.begin(115200);
+  pinMode(LED_R, OUTPUT);
+  pinMode(LED_G, OUTPUT);
+  pinMode(LED_B, OUTPUT);
 
   // ================= CONFIGURE AS PLANTAS AQUI =================
   // Formato:
@@ -465,8 +387,15 @@ void loop() {
     float temperatura = dht.readTemperature();
     float umidadeAr = dht.readHumidity();
 
+    bool sensorOk = !(isnan(temperatura) || isnan(umidadeAr));
+
+    // Atualiza o LED conforme o estado do sistema
+    atualizarStatusLed(sensorOk);
+
     // Primeiro usa RTC. Se falhar, usa API.
     String dataHora = obterDataHora();
+
+    delay(60);
 
     // ================= PUBLICA DHT =================
     if (!isnan(temperatura)) {
