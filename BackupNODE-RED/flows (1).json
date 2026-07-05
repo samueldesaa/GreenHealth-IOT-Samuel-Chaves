@@ -1,0 +1,378 @@
+[
+    {
+        "id": "d4a492f722390c01",
+        "type": "tab",
+        "label": "Fluxo 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "44c6842d143671ce",
+        "type": "tab",
+        "label": "Fluxo 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "81834399641c98c2",
+        "type": "mqtt-broker",
+        "name": "EMQX Public Broker",
+        "broker": "broker.emqx.io",
+        "port": 1883,
+        "clientid": "node_red_greenhealth",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "86324576ad568aa4",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-light",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#4B7930",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#0094CE",
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-backgroundColor": {
+                    "value": "#fafafa",
+                    "edited": false
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#1bbfff",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#111111",
+                    "edited": false
+                },
+                "widget-backgroundColor": {
+                    "value": "#0094ce",
+                    "edited": false
+                },
+                "widget-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            },
+            "angularTheme": {
+                "primary": "indigo",
+                "accents": "blue",
+                "warn": "red",
+                "background": "grey",
+                "palette": "light"
+            }
+        },
+        "site": {
+            "name": "Node-RED Dashboard",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "lockMenu": "false",
+            "allowTempTheme": "true",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "127db901fad981c8",
+        "type": "ui_tab",
+        "name": "83748743",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "79a01f09a1974c58",
+        "type": "ui_group",
+        "name": "Temperatura",
+        "tab": "127db901fad981c8",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "ad4522ca420b67a6",
+        "type": "sqlitedb",
+        "db": "C:\\Users\\samue\\OneDrive\\Documentos\\GitHub\\GreenHealth - IOT\\Database\\greenhealth.db",
+        "mode": "RWC"
+    },
+    {
+        "id": "6937ce11857ada78",
+        "type": "sqlitedb",
+        "db": "greenhealth.db",
+        "mode": "RWC"
+    },
+    {
+        "id": "806720c2efd4fc37",
+        "type": "function",
+        "z": "d4a492f722390c01",
+        "name": "Tratar dados das plantas",
+        "func": "const d = msg.payload;\n\nif (!d) {\n    node.warn(\"Payload vazio\");\n    return null;\n}\n\nif (!Array.isArray(d.plantas)) {\n    node.warn(\"Mensagem sem array de plantas\");\n    return null;\n}\n\nconst recebidoEm = new Date().toISOString();\n\nmsg.payload = d.plantas.map(p => {\n    return {\n        recebido_em: recebidoEm,\n        data_hora_esp: d.data_hora || null,\n        planta: Number(p.planta),\n        ldr: p.ldr !== undefined ? Number(p.ldr) : null,\n        umidade_solo: p.umidade_solo !== undefined ? Number(p.umidade_solo) : null,\n        temperatura: d.temperatura !== null && d.temperatura !== undefined ? Number(d.temperatura) : null,\n        umidade_ar: d.umidade_ar !== null && d.umidade_ar !== undefined ? Number(d.umidade_ar) : null\n    };\n});\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 730,
+        "y": 500,
+        "wires": [
+            [
+                "50cae970312577dd"
+            ]
+        ]
+    },
+    {
+        "id": "1cdb8dadd7a81a44",
+        "type": "function",
+        "z": "d4a492f722390c01",
+        "name": "Preparar INSERT SQLite",
+        "func": "const p = msg.payload;\n\nmsg.params = {\n    $recebido_em: p.recebido_em,\n    $data_hora_esp: p.data_hora_esp,\n    $planta: p.planta,\n    $ldr: p.ldr,\n    $umidade_solo: p.umidade_solo,\n    $temperatura: p.temperatura,\n    $umidade_ar: p.umidade_ar\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1250,
+        "y": 500,
+        "wires": [
+            [
+                "28260cb3a50a0231",
+                "11cab65787ed4b81"
+            ]
+        ]
+    },
+    {
+        "id": "9960a5161dd106df",
+        "type": "mqtt in",
+        "z": "d4a492f722390c01",
+        "name": "Receber dados GreenHealth",
+        "topic": "greenhealth/sensores/dados",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "81834399641c98c2",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 200,
+        "y": 500,
+        "wires": [
+            [
+                "d750f8ac7d1ed20a"
+            ]
+        ]
+    },
+    {
+        "id": "d750f8ac7d1ed20a",
+        "type": "json",
+        "z": "d4a492f722390c01",
+        "name": "Converter JSON",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 480,
+        "y": 500,
+        "wires": [
+            [
+                "806720c2efd4fc37"
+            ]
+        ]
+    },
+    {
+        "id": "50cae970312577dd",
+        "type": "split",
+        "z": "d4a492f722390c01",
+        "name": "Separar plantas",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "property": "payload",
+        "x": 1000,
+        "y": 500,
+        "wires": [
+            [
+                "1cdb8dadd7a81a44"
+            ]
+        ]
+    },
+    {
+        "id": "11cab65787ed4b81",
+        "type": "sqlite",
+        "z": "d4a492f722390c01",
+        "mydb": "ad4522ca420b67a6",
+        "sqlquery": "prepared",
+        "sql": "INSERT INTO leituras_plantas\n(recebido_em, data_hora_esp, planta, ldr, umidade_solo, temperatura, umidade_ar)\nVALUES\n($recebido_em, $data_hora_esp, $planta, $ldr, $umidade_solo, $temperatura, $umidade_ar);",
+        "name": "Salvar leitura SQLite",
+        "x": 1520,
+        "y": 500,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "28260cb3a50a0231",
+        "type": "debug",
+        "z": "d4a492f722390c01",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1450,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "796abb6de416375f",
+        "type": "inject",
+        "z": "44c6842d143671ce",
+        "name": "Criar tabela",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 230,
+        "y": 320,
+        "wires": [
+            [
+                "c332d53cd100725f"
+            ]
+        ]
+    },
+    {
+        "id": "c332d53cd100725f",
+        "type": "function",
+        "z": "44c6842d143671ce",
+        "name": "CREATE TABLE",
+        "func": "msg.topic = `\nCREATE TABLE IF NOT EXISTS leituras_plantas (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    recebido_em TEXT NOT NULL,\n    data_hora_esp TEXT,\n    planta INTEGER NOT NULL,\n    ldr INTEGER,\n    umidade_solo INTEGER,\n    temperatura REAL,\n    umidade_ar REAL\n);\n`;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 320,
+        "wires": [
+            [
+                "bd81e5ecd39cb17a"
+            ]
+        ]
+    },
+    {
+        "id": "bd81e5ecd39cb17a",
+        "type": "sqlite",
+        "z": "44c6842d143671ce",
+        "mydb": "ad4522ca420b67a6",
+        "sqlquery": "msg.topic",
+        "sql": "msg.topic = `\nCREATE TABLE IF NOT EXISTS leituras_plantas (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    recebido_em TEXT NOT NULL,\n    data_hora_esp TEXT,\n    planta INTEGER NOT NULL,\n    ldr INTEGER,\n    umidade_solo INTEGER,\n    temperatura REAL,\n    umidade_ar REAL\n);\n`;\n\nreturn msg;",
+        "name": "Criar tabela SQLite",
+        "x": 790,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3031939bcd32a55b",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.5",
+            "node-red-node-sqlite": "2.0.1"
+        }
+    }
+]
