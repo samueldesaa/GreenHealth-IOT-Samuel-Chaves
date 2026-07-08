@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>GreenHealth | Central da IA</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+
+<body>
+  <nav class="page-nav">
+    <a href="../Dashboard/index.html" class="nav-btn">Dashboard</a>
+    <a href="index.html" class="nav-btn active">Central da IA</a>
+  </nav>
+
+  <div class="page">
+    <header class="glass">
+      <div class="title-row">
+        <div class="brand">
+          <h1>Central da IA</h1>
+          <p>
+            Acompanhe em tempo real as decisões inteligentes do GreenHealth:
+            alertas, dicas, previsões de rega e recomendações para cada planta.
+          </p>
+        </div>
+
+        <div class="pill">
+          <span id="statusDot" class="dot"></span>
+          <span id="statusText">Desconectado</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="status-area glass">
+      <div>
+        <p>
+          <strong>Status MQTT:</strong>
+          <span id="statusDetail" class="status offline">Aguardando conexão automática...</span>
+        </p>
+        <p>
+          Conectado automaticamente ao mesmo broker MQTT do dashboard principal.
+        </p>
+      </div>
+
+      <div class="ia-actions">
+        <button id="connectBtn">Reconectar</button>
+        <button id="disconnectBtn" class="btn-secondary">Desconectar</button>
+      </div>
+    </section>
+
+    <section class="cards">
+      <div class="card glass">
+        <span>Alertas ativos</span>
+        <strong id="countAlertas">0</strong>
+        <small>Problemas detectados pela IA.</small>
+      </div>
+
+      <div class="card glass">
+        <span>Dicas recebidas</span>
+        <strong id="countDicas">0</strong>
+        <small>Recomendações de cuidado das plantas.</small>
+      </div>
+
+      <div class="card glass">
+        <span>Decisões da IA</span>
+        <strong id="countDecisoes">0</strong>
+        <small>Análises feitas com base na planilha.</small>
+      </div>
+
+      <div class="card glass">
+        <span>Regas sugeridas</span>
+        <strong id="countRegas">0</strong>
+        <small>Vezes em que a IA recomendou irrigação.</small>
+      </div>
+    </section>
+
+    <section class="servo-section glass">
+      <div class="debug-header">
+        <div>
+          <h2>Recomendações principais</h2>
+          <p>
+            Resumo geral da IA com os pontos mais importantes para agir primeiro.
+          </p>
+        </div>
+      </div>
+
+      <div id="mainRecommendations" class="ia-big-recommendations">
+        <div class="empty">
+          Aguardando recomendações da IA...
+        </div>
+      </div>
+    </section>
+
+    <section class="servo-section glass">
+      <div class="debug-header">
+        <div>
+          <h2>Indicações por planta</h2>
+          <p>
+            Cada vaso possui um painel próprio com decisão, previsão, alertas e dicas.
+          </p>
+        </div>
+      </div>
+
+      <div id="plantInsights" class="ia-plant-grid">
+        <div class="empty">
+          Aguardando decisões da IA para separar as informações por planta...
+        </div>
+      </div>
+    </section>
+
+    <section class="chart-box glass">
+      <div class="debug-header">
+        <div>
+          <h2>Última decisão da IA</h2>
+          <p id="lastUpdate">Sem dados recebidos ainda.</p>
+        </div>
+
+        <div id="decisionBadge" class="pill">
+          IA
+        </div>
+      </div>
+
+      <div id="decisionEmpty" class="empty">
+        Nenhuma decisão recebida ainda. Aguarde o agente Python publicar em
+        <strong>greenhealth/ia/decisoes</strong>.
+      </div>
+
+      <div id="decisionCard" class="servo-card hidden">
+        <h3 id="decisionPlant">Planta</h3>
+        <p id="decisionAction" class="servo-status">
+          Aguardando análise da IA...
+        </p>
+
+        <div class="cards ia-metrics">
+          <div class="card glass">
+            <span>Umidade do solo</span>
+            <strong id="metricSolo">--</strong>
+            <small>Valor recebido do sensor de solo.</small>
+          </div>
+
+          <div class="card glass">
+            <span>Temperatura</span>
+            <strong id="metricTemp">--</strong>
+            <small>Temperatura ambiente atual.</small>
+          </div>
+
+          <div class="card glass">
+            <span>Umidade do ar</span>
+            <strong id="metricAr">--</strong>
+            <small>Umidade relativa do ambiente.</small>
+          </div>
+
+          <div class="card glass">
+            <span>Luminosidade</span>
+            <strong id="metricLuz">--</strong>
+            <small>Luz calculada pelo LDR.</small>
+          </div>
+        </div>
+
+        <div class="debug-section glass ia-inner-section">
+          <h2>Motivos da decisão</h2>
+          <ul id="decisionReasons" class="ia-list"></ul>
+        </div>
+
+        <div class="debug-section glass ia-inner-section">
+          <h2>Limites usados pela IA</h2>
+          <div id="limitsBox" class="ia-limits"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="servo-section glass">
+      <div class="debug-header">
+        <div>
+          <h2>Notificações recebidas</h2>
+          <p>Histórico em tempo real das mensagens publicadas pela IA.</p>
+        </div>
+
+        <div class="range-row ia-filter-row">
+          <select id="filterSelect">
+            <option value="todos">Todos</option>
+            <option value="alerta">Alertas</option>
+            <option value="dica">Dicas</option>
+            <option value="decisao">Decisões</option>
+            <option value="previsao">Previsões</option>
+          </select>
+
+          <button id="clearBtn" class="btn-secondary">Limpar</button>
+        </div>
+      </div>
+
+      <div id="feed" class="ia-feed">
+        <div class="empty">
+          Nenhuma notificação recebida ainda.
+        </div>
+      </div>
+    </section>
+
+    <section class="servo-grid">
+      <div class="servo-card glass">
+        <h3>Alertas da IA</h3>
+        <p class="servo-info">
+          Riscos sobre excesso de água, baixa umidade, calor ou luminosidade inadequada.
+        </p>
+
+        <div id="alertsList" class="ia-compact-list">
+          <div class="empty">
+            Sem alertas até agora.
+          </div>
+        </div>
+      </div>
+
+      <div class="servo-card glass">
+        <h3>Dicas inteligentes</h3>
+        <p class="servo-info">
+          Recomendações baseadas na planilha e nas leituras dos sensores.
+        </p>
+
+        <div id="tipsList" class="ia-compact-list">
+          <div class="empty">
+            Sem dicas até agora.
+          </div>
+        </div>
+      </div>
+
+      <div class="servo-card glass">
+        <h3>Previsão de rega</h3>
+        <p class="servo-info">
+          Estimativa ou recomendação de próxima irrigação.
+        </p>
+
+        <div id="forecastList" class="ia-compact-list">
+          <div class="empty">
+            Aguardando dados em greenhealth/ia/previsao.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="debug-section glass">
+      <div class="debug-header">
+        <div>
+          <h2>Tópicos MQTT monitorados</h2>
+          <p>A página assina automaticamente os tópicos abaixo em tempo real.</p>
+        </div>
+      </div>
+
+      <pre id="mqttLog">greenhealth/ia/status
+greenhealth/ia/decisoes
+greenhealth/ia/alertas
+greenhealth/ia/dicas
+greenhealth/ia/previsao</pre>
+    </section>
+
+    <footer>
+      GreenHealth • Central de IA para irrigação inteligente e monitoramento de plantas.
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

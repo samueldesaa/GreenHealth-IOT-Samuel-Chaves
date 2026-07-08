@@ -1,0 +1,661 @@
+:root {
+  --bg-1: #071f2f;
+  --bg-2: #082f2d;
+  --green: #2ee68a;
+  --green-soft: rgba(46, 230, 138, 0.14);
+  --blue: #4bb3ff;
+  --blue-soft: rgba(75, 179, 255, 0.14);
+  --text: #f2fff9;
+  --muted: rgba(242, 255, 249, 0.68);
+  --muted-2: rgba(242, 255, 249, 0.48);
+  --danger: #ff6b7a;
+  --danger-soft: rgba(255, 107, 122, 0.13);
+  --warning: #ffd166;
+  --warning-soft: rgba(255, 209, 102, 0.13);
+  --card: rgba(255, 255, 255, 0.08);
+  --card-2: rgba(255, 255, 255, 0.12);
+  --border: rgba(255, 255, 255, 0.14);
+  --border-strong: rgba(255, 255, 255, 0.22);
+  --shadow: 0 18px 55px rgba(0, 0, 0, 0.24);
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text);
+  padding: 22px;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(46, 230, 138, 0.22), transparent 28%),
+    radial-gradient(circle at 85% 8%, rgba(75, 179, 255, 0.18), transparent 30%),
+    linear-gradient(135deg, var(--bg-1), var(--bg-2));
+}
+
+.page {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+/* ================= NAV ================= */
+
+.page-nav {
+  width: min(1120px, 100%);
+  margin: 0 auto 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  position: sticky;
+  top: 12px;
+  z-index: 50;
+}
+
+.nav-btn {
+  text-decoration: none;
+  color: var(--text);
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: 0.2s ease;
+}
+
+.nav-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.nav-btn.active {
+  background: linear-gradient(135deg, rgba(46, 230, 138, 0.95), rgba(75, 179, 255, 0.78));
+  border-color: transparent;
+}
+
+/* ================= BASE ================= */
+
+.glass {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+}
+
+header {
+  padding: 28px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.brand h1 {
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+  margin-bottom: 10px;
+}
+
+.brand p {
+  color: var(--muted);
+  max-width: 720px;
+  line-height: 1.55;
+  font-size: 0.98rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: fit-content;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--border);
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--danger);
+  box-shadow: 0 0 16px var(--danger);
+}
+
+.dot.online-dot {
+  background: var(--green);
+  box-shadow: 0 0 16px var(--green);
+}
+
+.status {
+  font-weight: 800;
+}
+
+.online {
+  color: var(--green);
+}
+
+.offline {
+  color: var(--danger);
+}
+
+/* ================= STATUS ================= */
+
+.status-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+
+.status-area p {
+  color: var(--muted);
+  line-height: 1.55;
+  font-size: 0.92rem;
+}
+
+.ia-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ================= BUTTONS ================= */
+
+button {
+  border: 0;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 999px;
+  font-weight: 850;
+  cursor: pointer;
+  background: linear-gradient(135deg, rgba(46, 230, 138, 0.92), rgba(75, 179, 255, 0.78));
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+  transition: 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.11);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+/* ================= CARDS SUPERIORES ================= */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card {
+  min-height: 110px;
+  padding: 18px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.card span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.card strong {
+  display: block;
+  color: white;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.card small {
+  display: block;
+  color: var(--muted-2);
+  margin-top: 8px;
+  line-height: 1.35;
+  font-size: 0.84rem;
+}
+
+/* ================= SEÇÕES ================= */
+
+.servo-section,
+.debug-section,
+.chart-box {
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+}
+
+.debug-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.servo-section h2,
+.debug-section h2,
+.chart-box h2 {
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.servo-section p,
+.debug-section p,
+.chart-box p {
+  color: var(--muted);
+  line-height: 1.55;
+  font-size: 0.92rem;
+}
+
+/* ================= RECOMENDAÇÕES PRINCIPAIS ================= */
+
+.ia-big-recommendations {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.ia-big-card {
+  min-height: 138px;
+  padding: 20px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ia-big-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--blue);
+  opacity: 0.9;
+}
+
+.ia-big-card span {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--blue);
+  background: var(--blue-soft);
+  margin-bottom: 8px;
+}
+
+.ia-big-card strong {
+  display: block;
+  font-size: clamp(1.08rem, 2vw, 1.45rem);
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+  color: white;
+}
+
+.ia-big-card small {
+  display: block;
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: 0.9rem;
+}
+
+.ia-big-card.water::before {
+  background: var(--green);
+}
+
+.ia-big-card.water span {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.ia-big-card.warning::before {
+  background: var(--warning);
+}
+
+.ia-big-card.warning span {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.ia-big-card.alert::before,
+.ia-big-card.danger::before {
+  background: var(--danger);
+}
+
+.ia-big-card.alert span,
+.ia-big-card.danger span {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+/* ================= PLANTAS MINIMALISTAS ================= */
+
+.ia-plant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.ia-plant-card {
+  padding: 20px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.ia-plant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.ia-plant-header h3 {
+  font-size: 1.18rem;
+  letter-spacing: -0.03em;
+  margin-bottom: 5px;
+}
+
+.ia-plant-header p {
+  color: var(--muted-2);
+  font-size: 0.88rem;
+}
+
+.ia-plant-status {
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ia-plant-status.water {
+  color: var(--green);
+  background: var(--green-soft);
+  border-color: rgba(46, 230, 138, 0.26);
+}
+
+.ia-plant-status.monitor {
+  color: var(--blue);
+  background: var(--blue-soft);
+  border-color: rgba(75, 179, 255, 0.24);
+}
+
+/* Bloco decisão */
+
+.ia-minimal-decision {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.ia-minimal-decision span,
+.ia-minimal-block span,
+.ia-alerta-planta span {
+  display: block;
+  color: var(--muted-2);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 900;
+  margin-bottom: 7px;
+}
+
+.ia-minimal-decision strong {
+  display: block;
+  color: white;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+
+.ia-minimal-block {
+  padding: 12px 0 0;
+  margin-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ia-minimal-block p,
+.ia-minimal-block li {
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+
+.ia-minimal-block ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.ia-minimal-block li + li {
+  margin-top: 6px;
+}
+
+/* Alerta da planta */
+
+.ia-alerta-planta {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  background: var(--warning-soft);
+  border: 1px solid rgba(255, 209, 102, 0.24);
+}
+
+.ia-alerta-planta span {
+  color: var(--warning);
+}
+
+.ia-alerta-planta p {
+  color: rgba(255, 248, 220, 0.88);
+  line-height: 1.45;
+  font-size: 0.92rem;
+}
+
+/* ================= ELEMENTOS ANTIGOS CASO APAREÇAM ================= */
+
+.servo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.servo-card {
+  padding: 18px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid var(--border);
+}
+
+.servo-card h3 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.servo-info,
+.servo-status {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.empty {
+  padding: 22px;
+  border-radius: 20px;
+  color: var(--muted);
+  text-align: center;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+}
+
+select,
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--text);
+  outline: none;
+  font-weight: 700;
+}
+
+select option {
+  color: #061d2f;
+}
+
+#mqttLog {
+  max-height: 190px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: rgba(242, 255, 249, 0.82);
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  line-height: 1.45;
+}
+
+footer {
+  margin-top: 18px;
+  text-align: center;
+  color: var(--muted-2);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ================= RESPONSIVO ================= */
+
+@media (max-width: 720px) {
+  body {
+    padding: 12px;
+  }
+
+  .page-nav {
+    position: static;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .nav-btn {
+    flex: 1;
+    text-align: center;
+    padding: 11px 10px;
+  }
+
+  header {
+    padding: 22px;
+    border-radius: 24px;
+  }
+
+  .brand h1 {
+    font-size: 2.15rem;
+  }
+
+  .status-area,
+  .debug-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ia-actions {
+    width: 100%;
+  }
+
+  .ia-actions button,
+  button {
+    width: 100%;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .card {
+    min-height: 104px;
+    padding: 15px;
+  }
+
+  .ia-big-recommendations,
+  .ia-plant-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .servo-section,
+  .debug-section,
+  .chart-box {
+    padding: 16px;
+    border-radius: 22px;
+  }
+}
+
+@media (max-width: 420px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .ia-plant-header {
+    flex-direction: column;
+  }
+
+  .ia-plant-status {
+    width: fit-content;
+  }
+}
