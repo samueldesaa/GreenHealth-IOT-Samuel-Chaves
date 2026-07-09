@@ -9,17 +9,44 @@
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
 
----
-
 ![GitHub repo size](https://img.shields.io/github/repo-size/samueldesaa/greenhealth-iot)
 ![GitHub last commit](https://img.shields.io/github/last-commit/samueldesaa/greenhealth-iot)
 
+---
 
 O **GreenHealth IoT** é uma versão reduzida do projeto GreenHealth, desenvolvida com foco em **Internet das Coisas** para o monitoramento de plantas domésticas.
 
 Nesta versão, o sistema utiliza um **ESP32** conectado a sensores para coletar dados do ambiente e das plantas, enviando essas informações por meio do protocolo **MQTT** para uma interface web.
 
----
+## Sumário
+
+1. [🌿 Problema](#-problema)
+2. [🎯 Objetivo do projeto](#-objetivo-do-projeto)
+3. [🧠 Funcionamento atual](#-funcionamento-atual)
+4. [🧰 Componentes usados](#-componentes-usados)
+   - [🔌 Hardware](#-hardware)
+   - [💻 Software e tecnologias](#-software-e-tecnologias)
+5. [🔌 Esquema de ligação](#-esquema-de-ligação)
+6. [📡 Comunicação MQTT](#-comunicação-mqtt)
+   - [Exemplo de tópicos MQTT](#exemplo-de-tópicos-mqtt)
+7. [🖥️ Dashboard web](#️-dashboard-web)
+   - [Recursos atuais da interface](#recursos-atuais-da-interface)
+8. [🚀 Como usar](#-como-usar)
+   - [1. Clonar o repositório](#1-clonar-o-repositório)
+   - [2. Abrir o código do ESP32](#2-abrir-o-código-do-esp32)
+   - [3. Instalar as bibliotecas necessárias](#3-instalar-as-bibliotecas-necessárias)
+   - [4. Configurar Wi-Fi](#4-configurar-wi-fi)
+   - [5. Configurar o broker MQTT](#5-configurar-o-broker-mqtt)
+   - [6. Conectar os sensores](#6-conectar-os-sensores)
+   - [7. Enviar o código para o ESP32](#7-enviar-o-código-para-o-esp32)
+   - [8. Abrir o dashboard](#8-abrir-o-dashboard)
+9. [📌 Estado atual do projeto](#-estado-atual-do-projeto)
+10. [🔮 O que falta implementar](#-o-que-falta-implementar)
+11. [🧪 Versão reduzida para IoT](#-versão-reduzida-para-iot)
+12. [📚 Aprendizados](#-aprendizados)
+13. [📦 Entrega do projeto](#-entrega-do-projeto)
+14. [👨‍💻 Autor](#-autor)
+15. [📄 Licença](#-licença)
 
 ## 🌿 Problema
 
