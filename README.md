@@ -160,7 +160,7 @@ Exemplo de configuração atual:
 
 Esse mapeamento permite que cada vaso seja analisado de forma individual. Assim, uma planta de perfil úmido, como a samambaia, não recebe a mesma recomendação de irrigação que uma planta mais resistente à seca.
 <p align="center">
-  <img src="assets/Planilha.png" alt="Planilha de perfis botânicos usada pela IA" width="700">
+  <img src="assets/Planilha.png" alt="Planilha de perfis botânicos usada pela IA" width="900">
 </p>
 
 ---
