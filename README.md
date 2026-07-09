@@ -187,7 +187,7 @@ O dashboard web foi desenvolvido em **HTML, CSS e JavaScript** para exibir as in
 
 <div align="center">
 
-
+<img src="assets/DashboardWeb.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
 <img src="assets/ControleServos.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
 <img src="assets\UmidadeLuminosidadePlantas.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
 
