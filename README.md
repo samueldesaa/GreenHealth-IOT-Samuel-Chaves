@@ -25,7 +25,7 @@
 3. [🧠 Funcionamento geral](#-funcionamento-geral)
 4. [🤖 Central da IA](#-central-da-ia)
 5. [🌱 Perfis botânicos usados pela IA](#-perfis-botânicos-usados-pela-ia)
-6. [🖥️ Dashboard web](#-dashboard-web)
+6. [🖥️ Dashboard web](#%EF%B8%8F-dashboard-web)
 7. [🧰 Componentes usados](#-componentes-usados)
 8. [🔌 Esquema de ligação atualizado](#-esquema-de-ligação-atualizado)
 9. [🚦 LED RGB de status](#-led-rgb-de-status)
