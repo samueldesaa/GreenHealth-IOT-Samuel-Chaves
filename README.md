@@ -18,21 +18,28 @@
 
 ## Sumário
 
+## Sumário
+
 1. [🌿 Problema](#-problema)
 2. [🎯 Objetivo do projeto](#-objetivo-do-projeto)
-3. [🧠 Funcionamento atual](#-funcionamento-atual)
-4. [🧰 Componentes usados](#-componentes-usados)
-5. [🔌 Esquema de ligação](#-esquema-de-ligação)
-6. [📡 Comunicação MQTT](#-comunicação-mqtt)
-7. [🖥️ Dashboard web](#️-dashboard-web)
-8. [🚀 Como usar](#-como-usar)
-9. [📌 Estado atual do projeto](#-estado-atual-do-projeto)
-10. [🔮 O que falta implementar](#-o-que-falta-implementar)
-11. [🧪 Versão reduzida para IoT](#-versão-reduzida-para-iot)
-12. [📚 Aprendizados](#-aprendizados)
-13. [📦 Entrega do projeto](#-entrega-do-projeto)
-14. [👨‍💻 Autor](#-autor)
-15. [📄 Licença](#-licença)
+3. [🧠 Funcionamento geral](#-funcionamento-geral)
+4. [🤖 Central da IA](#-central-da-ia)
+5. [🌱 Perfis botânicos usados pela IA](#-perfis-botânicos-usados-pela-ia)
+6. [🖥️ Dashboard web](#-dashboard-web)
+7. [🧰 Componentes usados](#-componentes-usados)
+8. [🔌 Esquema de ligação atualizado](#-esquema-de-ligação-atualizado)
+9. [🚦 LED RGB de status](#-led-rgb-de-status)
+10. [📡 Comunicação MQTT](#-comunicação-mqtt)
+11. [📤 Tópicos publicados pelo ESP32](#-tópicos-publicados-pelo-esp32)
+12. [📥 Tópicos de comando dos servos](#-tópicos-de-comando-dos-servos)
+13. [🤖 Tópicos da IA](#-tópicos-da-ia)
+14. [🧠 Como a IA decide os alertas](#-como-a-ia-decide-os-alertas)
+15. [🗃️ Node-RED e banco de dados](#️-node-red-e-banco-de-dados)
+16. [🚀 Como usar](#-como-usar)
+17. [📌 Estado atual do projeto](#-estado-atual-do-projeto)
+18. [🔮 Próximas melhorias](#-próximas-melhorias)
+19. [👨‍💻 Autor](#-autor)
+20. [📄 Licença](#-licença)
 ---
 
 O **GreenHealth IoT** é um sistema inteligente para **monitoramento, análise e irrigação automatizada de plantas domésticas**, utilizando **ESP32**, sensores ambientais, comunicação **MQTT**, dashboard web e uma **central de IA local** baseada em perfis botânicos.
