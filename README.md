@@ -90,21 +90,8 @@ O projeto é dividido em três partes principais:
 3. **Central da IA**  
    Código em Python que roda localmente, lê uma planilha com perfis botânicos e analisa os dados recebidos dos sensores para emitir alertas, dicas e recomendações.
 
-```txt
-🌱 Plantas
-   ↓
-📟 Sensores conectados ao ESP32
-   ↓
-📡 ESP32 publica dados via MQTT
-   ↓
-☁️ Broker EMQX
-   ↓                         ↓
-💻 Dashboard Web          🤖 Agente IA Python
-   ↓                         ↓
-📊 Gráficos e cards       🚨 Alertas, dicas e decisões
-   ↓                         ↓
-👤 Usuário              Central da IA no dashboard
-```
+
+<img src="assets/Diagrama.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
 <img src="assets/Irrigacao.gif" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
 
 
@@ -125,14 +112,6 @@ A planilha contém informações como:
 - Características da espécie;
 - Luminosidade ideal;
 - Temperatura ideal;
-- Umidade do ar ideal;
-- Umidade do solo ideal;
-- Limite para irrigar;
-- Limite de alerta de excesso de água;
-- Frequência aproximada de rega;
-- Observações específicas para IoT;
-- Fontes utilizadas;
-- Nível de confiança dos parâmetros.
 
 Com essas informações, a IA consegue:
 
