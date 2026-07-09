@@ -1,4 +1,4 @@
-# 🌱 GreenHealth IoT
+# 🌱 GreenHealth
 <p align="center">
   <img src="assets/DashboardWeb.png" alt="Dashboard web do GreenHealth IoT com sensores e gráficos em tempo real" width="700">
 </p>
