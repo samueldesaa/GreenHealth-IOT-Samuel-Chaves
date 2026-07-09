@@ -1,5 +1,7 @@
 # 🌱 GreenHealth IoT
-<img src="assets/DashboardWeb.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
+<p align="center">
+  <img src="assets/DashboardWeb.png" alt="Dashboard web do GreenHealth IoT com sensores e gráficos em tempo real" width="700">
+</p>
 
 ![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
 ![ESP32](https://img.shields.io/badge/hardware-ESP32-blue)
@@ -91,8 +93,12 @@ O projeto é dividido em três partes principais:
    Código em Python que roda localmente, lê uma planilha com perfis botânicos e analisa os dados recebidos dos sensores para emitir alertas, dicas e recomendações.
 
 
-<img src="assets/Diagrama.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
-<img src="assets/Irrigacao.gif" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
+<p align="center">
+  <img src="assets/Diagrama.png" alt="Diagrama geral de funcionamento do GreenHealth IoT" width="700">
+</p>
+<p align="center">
+  <img src="assets/Irrigacao.gif" alt="Demonstração do sistema de irrigação automatizada com servo" width="700">
+</p>
 
 
 ---
@@ -124,8 +130,13 @@ Com essas informações, a IA consegue:
 - Publicar alertas e dicas para a central da IA no dashboard;
 - Opcionalmente, enviar comandos de irrigação automática.
 
-<img src="assets/CentralIA.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
-<img src="assets/IndicacoesIA.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
+<p align="center">
+  <img src="assets/CentralIA.png" alt="Central da IA do GreenHealth IoT com alertas e recomendações" width="700">
+</p>
+<p align="center">
+  <img src="assets/IndicacoesIA.png" alt="Indicações da IA separadas por planta no GreenHealth IoT" width="700">
+</p>
+
 ---
 
 ## 🌱 Perfis botânicos usados pela IA
@@ -141,7 +152,9 @@ Exemplo de configuração atual:
 | Planta 3 | 42 | Peperomia Pixie Lime |
 
 Esse mapeamento permite que cada vaso seja analisado de forma individual. Assim, uma planta de perfil úmido, como a samambaia, não recebe a mesma recomendação de irrigação que uma planta mais resistente à seca.
-<img src="assets/Planilha.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
+<p align="center">
+  <img src="assets/Planilha.png" alt="Planilha de perfis botânicos usada pela IA" width="700">
+</p>
 
 ---
 
@@ -164,17 +177,19 @@ O dashboard web foi desenvolvido em **HTML, CSS e JavaScript** para exibir as in
 - Central da IA para alertas, dicas e notificações;
 - Atualização automática dos dados via MQTT.
 
-<div align="center">
-
-<img src="assets/DashboardWeb.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
-<img src="assets/ControleServos.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
-<img src="assets\UmidadeLuminosidadePlantas.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
+<p align="center">
+  <img src="assets/DashboardWeb.png" alt="Dashboard web do GreenHealth IoT com sensores e gráficos em tempo real" width="700">
+</p>
+<p align="center">
+  <img src="assets/ControleServos.png" alt="Controle manual dos servos de irrigação no dashboard" width="700">
+</p>
+<p align="center">
+  <img src="assets/UmidadeLuminosidadePlantas.png" alt="Gráficos de umidade e luminosidade das plantas no dashboard" width="700">
+</p>
 
 <br>
 
 <em>Dashboard de monitoramento dos sensores em tempo real utilizando MQTT.</em>
-
-</div>
 
 ---
 
@@ -237,16 +252,13 @@ O dashboard web foi desenvolvido em **HTML, CSS e JavaScript** para exibir as in
 > ⚠️ Os pinos **GPIO 34, 35, 36 e 39** do ESP32 são apenas entrada. Eles podem ser usados para sensores, mas não devem ser usados como saída para LED, servo, relé ou qualquer atuador.
 
 
-
-<div align="center">
-
-<img src="assets/Estrutura.jpeg" alt="Esquema elétrico do GreenHealth IoT" width="700">
+<p align="center">
+  <img src="assets/Estrutura.jpeg" alt="Protótipo físico do GreenHealth IoT com ESP32, sensores e atuadores" width="700">
+</p>
 
 <br>
 
 <em>Protótipo físico com ESP32, sensores e atuadores utilizados no monitoramento das plantas.</em>
-
-</div>
 
 ---
 
