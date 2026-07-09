@@ -1,22 +1,18 @@
 # 🌱 GreenHealth IoT
+<img src="assets/DashboardWeb.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
 
 ![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
 ![ESP32](https://img.shields.io/badge/hardware-ESP32-blue)
 ![MQTT](https://img.shields.io/badge/protocolo-MQTT-green)
 ![IoT](https://img.shields.io/badge/projeto-IoT-brightgreen)
-![Node-RED](https://img.shields.io/badge/Node--RED-futuro-red)
+![Node-RED](https://img.shields.io/badge/Node--RED-integrado-red)
+![Python](https://img.shields.io/badge/Python-IA%20local-blue)
 ![Arduino](https://img.shields.io/badge/Arduino_IDE-00979D?logo=arduino&logoColor=white)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
-
 ![GitHub repo size](https://img.shields.io/github/repo-size/samueldesaa/greenhealth-iot)
 ![GitHub last commit](https://img.shields.io/github/last-commit/samueldesaa/greenhealth-iot)
 
----
-
-O **GreenHealth IoT** é uma versão reduzida do projeto GreenHealth, desenvolvida com foco em **Internet das Coisas** para o monitoramento de plantas domésticas.
-
-Nesta versão, o sistema utiliza um **ESP32** conectado a sensores para coletar dados do ambiente e das plantas, enviando essas informações por meio do protocolo **MQTT** para uma interface web.
 
 ## Sumário
 
@@ -24,22 +20,10 @@ Nesta versão, o sistema utiliza um **ESP32** conectado a sensores para coletar 
 2. [🎯 Objetivo do projeto](#-objetivo-do-projeto)
 3. [🧠 Funcionamento atual](#-funcionamento-atual)
 4. [🧰 Componentes usados](#-componentes-usados)
-   - [🔌 Hardware](#-hardware)
-   - [💻 Software e tecnologias](#-software-e-tecnologias)
 5. [🔌 Esquema de ligação](#-esquema-de-ligação)
 6. [📡 Comunicação MQTT](#-comunicação-mqtt)
-   - [Exemplo de tópicos MQTT](#exemplo-de-tópicos-mqtt)
 7. [🖥️ Dashboard web](#️-dashboard-web)
-   - [Recursos atuais da interface](#recursos-atuais-da-interface)
 8. [🚀 Como usar](#-como-usar)
-   - [1. Clonar o repositório](#1-clonar-o-repositório)
-   - [2. Abrir o código do ESP32](#2-abrir-o-código-do-esp32)
-   - [3. Instalar as bibliotecas necessárias](#3-instalar-as-bibliotecas-necessárias)
-   - [4. Configurar Wi-Fi](#4-configurar-wi-fi)
-   - [5. Configurar o broker MQTT](#5-configurar-o-broker-mqtt)
-   - [6. Conectar os sensores](#6-conectar-os-sensores)
-   - [7. Enviar o código para o ESP32](#7-enviar-o-código-para-o-esp32)
-   - [8. Abrir o dashboard](#8-abrir-o-dashboard)
 9. [📌 Estado atual do projeto](#-estado-atual-do-projeto)
 10. [🔮 O que falta implementar](#-o-que-falta-implementar)
 11. [🧪 Versão reduzida para IoT](#-versão-reduzida-para-iot)
@@ -47,27 +31,37 @@ Nesta versão, o sistema utiliza um **ESP32** conectado a sensores para coletar 
 13. [📦 Entrega do projeto](#-entrega-do-projeto)
 14. [👨‍💻 Autor](#-autor)
 15. [📄 Licença](#-licença)
+---
+
+O **GreenHealth IoT** é um sistema inteligente para **monitoramento, análise e irrigação automatizada de plantas domésticas**, utilizando **ESP32**, sensores ambientais, comunicação **MQTT**, dashboard web e uma **central de IA local** baseada em perfis botânicos.
+
+O projeto coleta dados reais das plantas, como umidade do solo, luminosidade, temperatura e umidade do ar, envia essas informações via MQTT e permite que o usuário acompanhe tudo em tempo real por meio de uma interface web. Além disso, um agente em Python analisa uma base com informações detalhadas de mais de 60 plantas e gera alertas, dicas e notificações para auxiliar no cuidado individualizado de cada espécie.
+
 
 ## 🌿 Problema
 
-O cuidado com plantas domésticas geralmente é feito de forma manual e intuitiva. Isso pode dificultar o acompanhamento correto das condições da planta e do ambiente, causando problemas como:
+O cuidado com plantas domésticas geralmente é feito de forma manual e intuitiva. Isso dificulta o acompanhamento correto das condições de cada planta, principalmente quando espécies diferentes possuem necessidades distintas de água, luz, temperatura e umidade.
+
+Entre os principais problemas estão:
 
 - Falta de água;
 - Excesso de água;
-- Baixa luminosidade;
-- Dificuldade de acompanhar temperatura e umidade do ar;
-- Ausência de dados para apoiar decisões sobre o cuidado da planta.
+- Baixa ou alta luminosidade;
+- Falta de acompanhamento da temperatura;
+- Baixa umidade do ar;
+- Dificuldade de saber quando regar;
+- Falta de dados para apoiar decisões;
+- Ausência de recomendações específicas para cada espécie.
 
 Dessa forma, o projeto busca responder ao seguinte problema:
 
-> Como utilizar IoT para monitorar as condições ambientais de plantas domésticas e auxiliar o usuário no acompanhamento da umidade, luminosidade, temperatura e umidade do ar?
+> Como utilizar IoT, automação e análise inteligente de perfis botânicos para monitorar plantas domésticas e auxiliar o usuário no cuidado individualizado de cada espécie?
 
 ---
 
 ## 🎯 Objetivo do projeto
 
-Desenvolver o GREENHEALTH, um sistema inteligente para monitoramento e irrigação automatizada de plantas domésticas, capaz de utilizar dados ambientais, informações climáticas e perfis botânicos para apoiar o cuidado individualizado, ampliar a autonomia da irrigação e permitir o acompanhamento remoto pelo usuário. 
-
+Desenvolver o **GreenHealth IoT**, um sistema inteligente para monitoramento e irrigação automatizada de plantas domésticas, capaz de utilizar dados ambientais, leituras dos sensores e perfis botânicos para apoiar o cuidado individualizado, ampliar a autonomia da irrigação e permitir o acompanhamento remoto pelo usuário.
 
 O sistema permite acompanhar:
 
@@ -75,51 +69,131 @@ O sistema permite acompanhar:
 - ☀️ Luminosidade;
 - 🌡️ Temperatura do ambiente;
 - 🌫️ Umidade do ar;
+- 🕒 Data e hora das leituras;
 - 📡 Status de conexão MQTT;
-- 🕒 Data e hora das leituras.
+- 🚿 Estado dos servos de irrigação;
+- 🤖 Alertas e recomendações da IA;
+- 📊 Histórico e gráficos das leituras.
 
 ---
 
-## 🧠 Funcionamento atual
+## 🧠 Funcionamento geral
 
-Atualmente, o projeto está estruturado para realizar a leitura dos sensores no ESP32 e enviar os dados coletados para um broker MQTT.
+O projeto é dividido em três partes principais:
 
-A interface web recebe essas informações e apresenta os dados ao usuário por meio de cards, gráficos e indicadores visuais.
+1. **ESP32 com sensores e atuadores**  
+   Responsável por ler os sensores das plantas, controlar os servos de irrigação e publicar os dados no MQTT.
+
+2. **Dashboard Web**  
+   Interface para visualizar os dados dos sensores em tempo real, acompanhar gráficos, status MQTT, histórico de irrigação e controlar os servos manualmente.
+
+3. **Central da IA**  
+   Código em Python que roda localmente, lê uma planilha com perfis botânicos e analisa os dados recebidos dos sensores para emitir alertas, dicas e recomendações.
 
 ```txt
-🌱 Sensores
+🌱 Plantas
    ↓
-📟 ESP32
-   ↓ MQTT
+📟 Sensores conectados ao ESP32
+   ↓
+📡 ESP32 publica dados via MQTT
+   ↓
 ☁️ Broker EMQX
-   ↓ WebSocket
-💻 Dashboard Web
-   ↓
-👤 Usuário
+   ↓                         ↓
+💻 Dashboard Web          🤖 Agente IA Python
+   ↓                         ↓
+📊 Gráficos e cards       🚨 Alertas, dicas e decisões
+   ↓                         ↓
+👤 Usuário              Central da IA no dashboard
 ```
+<img src="assets/Irrigacao.gif" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
 
-
-Nesta etapa, o foco principal está no **monitoramento ambiental** das plantas, permitindo visualizar os dados em tempo real.
-
-<div align="center">
-
-<img src="assets/TesteMonitoramento.jpg" alt="Protótipo físico do GreenHealth IoT" width="700">
-
-<br>
-
-<em>Protótipo físico com ESP32 e sensores utilizados no monitoramento das plantas.</em>
-
-</div>
 
 ---
 
+## 🤖 Central da IA
+
+A central da IA é um módulo local desenvolvido em **Python**. Ela analisa os dados enviados pelo ESP32 e compara essas leituras com uma base de conhecimento de perfis botânicos.
+
+Essa base está em uma planilha `.csv` ou `.xlsx`, construída a partir de revisão bibliográfica com artigos, sites técnicos, extensões universitárias, blogs especializados e fontes populares sobre plantas domésticas.
+
+A planilha contém informações como:
+
+- Nome popular da planta;
+- Nome científico;
+- Família botânica;
+- Perfil botânico sugerido;
+- Características da espécie;
+- Luminosidade ideal;
+- Temperatura ideal;
+- Umidade do ar ideal;
+- Umidade do solo ideal;
+- Limite para irrigar;
+- Limite de alerta de excesso de água;
+- Frequência aproximada de rega;
+- Observações específicas para IoT;
+- Fontes utilizadas;
+- Nível de confiança dos parâmetros.
+
+Com essas informações, a IA consegue:
+
+- Identificar se a planta está com pouca água;
+- Alertar sobre excesso de umidade no solo;
+- Indicar luminosidade insuficiente ou excessiva;
+- Verificar se a temperatura está fora do ideal;
+- Verificar se a umidade do ar está inadequada;
+- Gerar recomendações específicas conforme o perfil botânico;
+- Publicar alertas e dicas para a central da IA no dashboard;
+- Opcionalmente, enviar comandos de irrigação automática.
+
+<img src="assets/CentralIA.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
+<img src="assets/IndicacoesIA.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
+---
+
+## 🌱 Perfis botânicos usados pela IA
+
+O agente de IA trabalha com um mapeamento entre os vasos físicos do ESP32 e os IDs da planilha de perfis botânicos.
+
+Exemplo de configuração atual:
+
+| Vaso físico no ESP32 | ID na planilha | Planta |
+|---|---:|---|
+| Planta 1 | 18 | Samambaia-de-boston |
+| Planta 2 | 24 | Jiboia / Pothos |
+| Planta 3 | 42 | Peperomia Pixie Lime |
+
+Esse mapeamento permite que cada vaso seja analisado de forma individual. Assim, uma planta de perfil úmido, como a samambaia, não recebe a mesma recomendação de irrigação que uma planta mais resistente à seca.
+<img src="assets/Planilha.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
+
+---
+
+## 🖥️ Dashboard web
+
+O dashboard web foi desenvolvido em **HTML, CSS e JavaScript** para exibir as informações do sistema em tempo real.
+
+### Recursos do dashboard
+
+- Cards com valores atuais dos sensores;
+- Gráficos de linha em tempo real;
+- Status de conexão MQTT;
+- Visualização da umidade do solo;
+- Visualização da luminosidade;
+- Visualização da temperatura e umidade do ar;
+- Histórico de irrigação;
+- Controle manual dos servos;
+- Slider de 0° a 90° para controle dos servos;
+- Botão para enviar comandos de irrigação;
+- Central da IA para alertas, dicas e notificações;
+- Atualização automática dos dados via MQTT.
+
 <div align="center">
 
-<img src="assets/DashboardMobile.jpg" alt="Protótipo físico do GreenHealth IoT" width="700">
+
+<img src="assets/ControleServos.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
+<img src="assets\UmidadeLuminosidadePlantas.png" alt="Dashboard de monitoramento do GreenHealth IoT" width="700">
 
 <br>
 
-<em>Dashboard de monitoramento dos sensores em tempo real utilizando MQTT</em>
+<em>Dashboard de monitoramento dos sensores em tempo real utilizando MQTT.</em>
 
 </div>
 
@@ -132,8 +206,10 @@ Nesta etapa, o foco principal está no **monitoramento ambiental** das plantas, 
 - ESP32;
 - Sensores de umidade do solo;
 - Sensores LDR para luminosidade;
-- Sensor DHT para temperatura e umidade do ar;
+- Sensor DHT11 para temperatura e umidade do ar;
 - RTC DS3231;
+- Microservos para controle de irrigação;
+- LED RGB para indicação de status;
 - Jumpers;
 - Protoboard;
 - Cabo USB ou fonte de alimentação.
@@ -144,101 +220,230 @@ Nesta etapa, o foco principal está no **monitoramento ambiental** das plantas, 
 - HTML;
 - CSS;
 - JavaScript;
+- Python;
+- Pandas;
+- OpenPyXL;
+- Paho MQTT;
 - MQTT;
 - Broker EMQX;
 - PubSubClient;
-- WiFi;
+- ESP32Servo;
+- DHT sensor library;
+- RTClib;
+- Node-RED;
+- SQLite;
+- Chart.js.
 
 ---
 
-## 🔌 Esquema de ligação
+## 🔌 Esquema de ligação atualizado
+
+### Sensores, RTC, LED e servos
 
 | Componente | Pino no ESP32 | Observação |
-|---|---|---|
-| Sensor de umidade do solo 1 | GPIO 26 | Entrada analógica |
-| Sensor de umidade do solo 2 | GPIO 33 | Entrada analógica |
-| Sensor de umidade do solo 3 | GPIO 35 | Entrada analógica |
-| LDR 1 | GPIO 25 | Entrada analógica |
-| LDR 2 | GPIO 32 | Entrada analógica |
-| LDR 3 | GPIO 34 | Entrada analógica |
-| DHT | GPIO 27 | Entrada digital |
-| RTC SDA | GPIO 12 | Comunicação I2C |
-| RTC SCL | GPIO 13 | Comunicação I2C |
-| VCC dos sensores | 3V3 ou 5V | Conforme o módulo utilizado |
-| GND dos sensores | GND | Terra comum |
+|---|---:|---|
+| DHT11 | GPIO 5 | Temperatura e umidade do ar |
+| RTC DS3231 SDA | GPIO 19 | Comunicação I2C |
+| RTC DS3231 SCL | GPIO 21 | Comunicação I2C |
+| LED RGB - Vermelho | GPIO 16 | Status do sistema |
+| LED RGB - Verde | GPIO 17 | Status do sistema |
+| LED RGB - Azul | GPIO 18 | Status do sistema |
+| Planta 1 - LDR | GPIO 33 | Entrada analógica |
+| Planta 1 - Umidade do solo | GPIO 35 | Entrada analógica, apenas entrada |
+| Planta 1 - Servo | GPIO 26 | Saída PWM para irrigação |
+| Planta 2 - LDR | GPIO 36 | Entrada analógica, apenas entrada |
+| Planta 2 - Umidade do solo | GPIO 34 | Entrada analógica, apenas entrada |
+| Planta 2 - Servo | GPIO 27 | Saída PWM para irrigação |
 
-> ⚠️ **Atenção:** os pinos GPIO 34, 35, 36 e 39 do ESP32 são apenas entrada. Eles podem ser usados para sensores, mas não devem ser usados como saída.
+> ⚠️ Os pinos **GPIO 34, 35, 36 e 39** do ESP32 são apenas entrada. Eles podem ser usados para sensores, mas não devem ser usados como saída para LED, servo, relé ou qualquer atuador.
+
+
 
 <div align="center">
 
-<img src="assets/EsquemaEletrico.jpg" alt="Protótipo físico do GreenHealth IoT" width="700">
+<img src="assets/Estrutura.jpeg" alt="Esquema elétrico do GreenHealth IoT" width="700">
 
 <br>
 
-<em>Protótipo físico com ESP32 e sensores utilizados no monitoramento das plantas.</em>
+<em>Protótipo físico com ESP32, sensores e atuadores utilizados no monitoramento das plantas.</em>
 
 </div>
 
+---
+
+## 🚦 LED RGB de status
+
+O LED RGB indica visualmente o estado do sistema:
+
+| Cor | Significado |
+|---|---|
+| 🔴 Vermelho | MQTT desconectado |
+| 🟢 Verde | Sistema conectado e sensores funcionando |
+| 🟡 Amarelo | Sensor com erro ou leitura inválida |
+| 🔵 Azul | Servo em movimento ou irrigação em execução |
+
+---
 
 ## 📡 Comunicação MQTT
 
-O projeto utiliza o protocolo **MQTT** para comunicação entre o ESP32 e a interface web.
+O projeto utiliza o protocolo **MQTT** para comunicação entre ESP32, dashboard web, Node-RED e agente de IA.
+
+### Broker
 
 | Item | Valor |
 |---|---|
-| Broker utilizado | `broker.emqx.io` |
-| Porta MQTT no ESP32 | `1883` |
-| Porta WebSocket para o dashboard | `8084` |
+| Broker MQTT | `broker.emqx.io` |
+| Porta MQTT ESP32/Python/Node-RED | `1883` |
+| Porta WebSocket do dashboard | `8084` |
 
-### Exemplo de tópicos MQTT
+---
 
-```txt
-greenhealth/temperatura
-greenhealth/umidade_ar
-greenhealth/data_hora
-greenhealth/dados
-```
+## 📤 Tópicos publicados pelo ESP32
 
-Também é possível enviar todos os dados em um único tópico no formato JSON:
+| Tópico | Função |
+|---|---|
+| `greenhealth/sensores/temperatura` | Temperatura do ar |
+| `greenhealth/sensores/umidade_ar` | Umidade do ar |
+| `greenhealth/sensores/data_hora` | Data e hora da leitura |
+| `greenhealth/sensores/dados` | JSON completo com todos os sensores |
+
+### Exemplo de JSON publicado
 
 ```json
 {
   "temperatura": 28.5,
   "umidade_ar": 70,
-  "solo1": 45,
-  "solo2": 52,
-  "solo3": 38,
-  "luz1": 1800,
-  "luz2": 2100,
-  "luz3": 1650,
-  "data_hora": "11/06/2026 18:30"
+  "data_hora": "11/06/2026 18:30:00",
+  "plantas": [
+    {
+      "planta": 1,
+      "ldr": 2200,
+      "luminosidade": 53.72,
+      "umidade_solo": 42,
+      "servo": 0
+    },
+    {
+      "planta": 2,
+      "ldr": 1800,
+      "luminosidade": 43.95,
+      "umidade_solo": 57,
+      "servo": 0
+    }
+  ]
 }
 ```
 
 ---
 
-## 🖥️ Dashboard web
+## 📥 Tópicos de comando dos servos
 
-A interface web foi desenvolvida para exibir os dados recebidos do ESP32 em tempo real.
+O ESP32 escuta comandos de servo no seguinte padrão:
 
-### Recursos atuais da interface
+```txt
+greenhealth/planta1/servo
+greenhealth/planta2/servo
+greenhealth/planta3/servo
+```
 
-- Cards com valores atuais dos sensores;
-- Gráficos de linha em tempo real;
-- Status de conexão com o MQTT;
-- Visualização dos sensores de umidade;
-- Visualização dos sensores de luminosidade;
-- Visualização da temperatura e umidade do ar;
-- Atualização automática dos dados.
+Comandos aceitos:
+
+| Mensagem | Ação |
+|---|---|
+| `ativar` | Abre o servo, aguarda o tempo configurado e fecha |
+| `regar` | Mesmo comportamento de `ativar` |
+| `1` | Mesmo comportamento de `ativar` |
+| `abrir` | Abre o servo |
+| `fechar` | Fecha o servo |
+| `0` a `90` | Move o servo para o ângulo informado |
+
+### Tópicos de retorno dos servos
+
+| Tópico | Função |
+|---|---|
+| `greenhealth/planta1/servo/status` | Status do servo da Planta 1 |
+| `greenhealth/planta1/servo/angulo` | Ângulo atual do servo da Planta 1 |
+| `greenhealth/planta2/servo/status` | Status do servo da Planta 2 |
+| `greenhealth/planta2/servo/angulo` | Ângulo atual do servo da Planta 2 |
 
 ---
+
+## 🤖 Tópicos da IA
+
+O agente de IA em Python escuta os dados dos sensores e publica alertas, dicas e decisões em tópicos próprios.
+
+| Tópico | Função |
+|---|---|
+| `greenhealth/sensores/dados` | Entrada de dados para análise da IA |
+| `greenhealth/ia/status` | Status do agente de IA |
+| `greenhealth/ia/alertas` | Alertas de cuidado com as plantas |
+| `greenhealth/ia/dicas` | Dicas e recomendações |
+| `greenhealth/ia/decisoes` | Decisões tomadas pela IA |
+
+> ⚠️ Observação importante: no código Python atual, o tópico base dos comandos automáticos de servo está configurado como `greenhealth/atuadores`. Já o ESP32 escuta `greenhealth/+/servo`, como `greenhealth/planta1/servo`. Para irrigação automática funcionar diretamente, os tópicos precisam estar alinhados. Uma solução simples é ajustar o Python para publicar em `greenhealth/planta1/servo`, `greenhealth/planta2/servo` e assim por diante.
+
+---
+
+## 🧠 Como a IA decide os alertas
+
+A IA analisa cada planta com base em:
+
+- Umidade do solo medida;
+- Limite mínimo de irrigação da espécie;
+- Limite de excesso de água;
+- Faixa ideal de luminosidade;
+- Faixa ideal de temperatura;
+- Faixa ideal de umidade do ar;
+- Frequência aproximada de rega;
+- Última irrigação registrada;
+- Perfil botânico da planta.
+
+Exemplo de decisão:
+
+```txt
+Se a Planta 1 for uma Samambaia-de-boston:
+- Umidade ideal do solo: 55% a 75%
+- Irrigar abaixo de: 50%
+- Alerta de excesso: acima de 85%
+
+Se o sensor indicar 38%:
+→ A IA gera alerta de baixa umidade
+→ A IA recomenda irrigação
+→ A central da IA exibe a notificação no dashboard
+```
+
+---
+
+## 🗃️ Node-RED e banco de dados
+
+O projeto também possui integração com **Node-RED** para receber os dados MQTT e armazenar as leituras em banco local.
+
+O banco utilizado é um arquivo SQLite localizado em:
+
+```txt
+Database/greenhealth.db
+```
+
+Exemplo de caminho local usado no desenvolvimento:
+
+```txt
+C:\Users\samue\OneDrive\Documentos\GitHub\GreenHealth - IOT\Database\greenhealth.db
+```
+
+O Node-RED pode ser usado para:
+
+- Receber mensagens MQTT;
+- Tratar os dados dos sensores;
+- Salvar histórico no banco SQLite;
+- Gerar base para gráficos históricos;
+- Integrar os dados com outras automações futuras.
+
 
 ## 🚀 Como usar
 
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/greenhealth-iot.git
+git clone https://github.com/samueldesaa/greenhealth-iot.git
 ```
 
 ### 2. Abrir o código do ESP32
@@ -246,39 +451,38 @@ git clone https://github.com/seu-usuario/greenhealth-iot.git
 Abra o arquivo na Arduino IDE:
 
 ```txt
-Teste3SensoresHumLDR\Teste3SensoresHumLDR.ino
+Esp32-Codes/Teste3SensoresHumLDR/Teste3SensoresHumLDR.ino
 ```
 
-### 3. Instalar as bibliotecas necessárias
+### 3. Instalar as bibliotecas do Arduino
 
-Na Arduino IDE, instale as seguintes bibliotecas:
+Na Arduino IDE, instale:
 
 - WiFi;
 - PubSubClient;
+- ESP32Servo;
 - DHT sensor library;
 - RTClib.
 
 ### 4. Configurar Wi-Fi
 
-No código do ESP32, altere os dados da rede Wi-Fi:
+No código do ESP32, altere os dados da rede:
 
 ```cpp
-const char* ssid = "NOME_DA_REDE";
-const char* password = "SENHA_DA_REDE";
+const char* WIFI_SSID = "NOME_DA_REDE";
+const char* WIFI_PASSWORD = "SENHA_DA_REDE";
 ```
 
-### 5. Configurar o broker MQTT
-
-Verifique se o broker está configurado corretamente:
+### 5. Conferir broker MQTT
 
 ```cpp
-const char* mqtt_server = "broker.emqx.io";
-const int mqtt_port = 1883;
+const char* MQTT_BROKER = "broker.emqx.io";
+const int MQTT_PORT = 1883;
 ```
 
-### 6. Conectar os sensores
+### 6. Montar o circuito
 
-Monte o circuito seguindo a tabela de conexões apresentada neste README.
+Monte os sensores, RTC, LED RGB e servos seguindo a tabela de conexões deste README.
 
 ### 7. Enviar o código para o ESP32
 
@@ -287,21 +491,41 @@ Na Arduino IDE:
 1. Selecione a placa ESP32 correta;
 2. Escolha a porta COM correspondente;
 3. Clique em **Upload**;
-4. Abra o **Monitor Serial** para verificar a conexão Wi-Fi e MQTT.
+4. Abra o **Monitor Serial** para verificar Wi-Fi, MQTT, RTC, sensores e servos.
 
 ### 8. Abrir o dashboard
 
 Abra o arquivo:
 
 ```txt
-web/index.html
+Dashboard/index.html
 ```
 
-Ou publique a pasta `web/` em uma plataforma como:
+Ou publique a pasta em uma plataforma como:
 
 - GitHub Pages;
 - Vercel;
 - Netlify.
+
+### 9. Rodar a IA local
+
+Instale as dependências:
+
+```bash
+pip install paho-mqtt pandas openpyxl
+```
+
+Depois execute:
+
+```bash
+python IAPython/AgenteIA.py
+```
+
+A planilha de perfis deve estar em:
+
+```txt
+IAPython/perfis_plantas.csv
+```
 
 ---
 
@@ -310,78 +534,50 @@ Ou publique a pasta `web/` em uma plataforma como:
 | Módulo | Status |
 |---|---|
 | Repositório criado | ✅ Concluído |
-| Código atual do ESP32 | ✅ Implementado |
-| Leitura dos sensores | ✅ Implementado |
+| Código do ESP32 | ✅ Implementado |
+| Leitura de sensores | ✅ Implementado |
 | Envio de dados por MQTT | ✅ Implementado |
 | Dashboard web | ✅ Implementado |
 | Exibição de gráficos | ✅ Implementado |
 | Status de conexão MQTT | ✅ Implementado |
-| Data e hora das leituras | ✅ Implementado |
-| README com descrição do projeto | ✅ Implementado |
-| Esquema de ligação | ✅ Parcial |
-| Irrigação automatizada | 🔜 A implementar |
-| Reservatórios locais com servos | 🔜 A implementar |
-| Node-RED para tratamento dos dados MQTT | 🔜 A implementar |
+| RTC DS3231 | ✅ Implementado |
+| LED RGB de status | ✅ Implementado |
+| Controle manual dos servos | ✅ Implementado |
+| Histórico de irrigação no dashboard | ✅ Implementado |
+| Central da IA | ✅ Implementado |
+| Planilha de perfis botânicos | ✅ Implementado |
+| Agente Python com análise local | ✅ Implementado |
+| Node-RED para salvar dados | ✅ Implementado |
+| Banco SQLite local | ✅ Implementado |
+| Irrigação automática via IA | ⚠️ Parcial, depende de alinhar tópicos |
+| Calibração final dos sensores | 🔜 A ajustar |
+| Testes prolongados com plantas reais | 🔜 A realizar |
 
 ---
 
-## 🔮 O que falta implementar
+## 🔮 Próximas melhorias
 
 Para as próximas etapas do projeto, espera-se implementar:
 
-- 💧 **Irrigação automatizada**, permitindo que o sistema controle a liberação de água para as plantas;
-- 🧴 **Reservatórios locais**, em que cada planta poderá ter seu próprio armazenamento de água;
-- ⚙️ **Liberação de água por servos**, utilizando microservos para controlar o fluxo de irrigação;
-- 🔴 **Node-RED**, para criação de fluxos de tratamento das informações recebidas via MQTT;
-- 📊 Processamento dos dados antes da exibição no dashboard;
-- 🚨 Possíveis alertas para baixa umidade do solo, excesso de água ou luminosidade inadequada;
-- 🗃️ Histórico de leituras para acompanhamento da evolução das condições das plantas.
+- Ajuste final dos tópicos entre IA e ESP32 para irrigação automática;
+- Calibração individual dos sensores de umidade do solo;
+- Calibração dos LDRs conforme o ambiente real;
+- Melhorias na central da IA;
+- Alertas por WhatsApp, Telegram ou e-mail;
+- Histórico completo de decisões da IA;
+- Painel de comparação entre plantas;
+- Cadastro dinâmico de plantas pelo dashboard;
+- Integração mais avançada com Node-RED;
+- Testes com diferentes espécies em ambiente doméstico;
+- Melhorias no sistema físico de gotejamento com servos;
+- Fonte externa mais estável para alimentar os servos.
 
----
-
-## 🧪 Versão reduzida para IoT
-
-Esta versão representa uma adaptação simplificada do projeto GreenHealth original.
-
-Ela mantém o foco no **monitoramento ambiental** e na **comunicação IoT**, mas ainda não inclui todos os recursos planejados para a versão completa, como automação da irrigação, perfis botânicos, recomendações inteligentes e integração avançada com serviços externos.
-
----
-
-## 📚 Aprendizados
-
-Durante o desenvolvimento do projeto foram trabalhados conceitos como:
-
-- Leitura de sensores no ESP32;
-- Comunicação Wi-Fi;
-- Comunicação MQTT;
-- Integração entre hardware e web;
-- Uso de JSON;
-- Criação de dashboard;
-- Gráficos em tempo real;
-- Organização de projeto no GitHub;
-- Planejamento de automação com sensores e atuadores.
-
----
-
-## 📦 Entrega do projeto
-
-Este repositório contém:
-
-- ✅ Código atual do projeto;
-- ✅ README com nome do projeto;
-- ✅ Descrição do problema;
-- ✅ Lista de componentes usados;
-- ✅ Explicação do funcionamento;
-- ✅ Instruções básicas de uso;
-- ✅ Indicação do que ainda falta implementar.
-
----
 
 ## 👨‍💻 Autor
 
 Desenvolvido por **Samuel Chaves de Sá**.
 
-Projeto acadêmico desenvolvido no curso de **Sistemas de Informação**, com foco em **IoT, automação, monitoramento ambiental e cuidado inteligente de plantas domésticas**.
+Projeto acadêmico desenvolvido no curso de **Sistemas de Informação**, com foco em **IoT**.
 
 ---
 

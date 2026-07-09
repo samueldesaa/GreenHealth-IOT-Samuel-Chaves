@@ -23,9 +23,11 @@
 import json
 import math
 import os
+import random
 import re
 import signal
 import sys
+import threading
 import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
@@ -51,14 +53,41 @@ MQTT_PORT = 1883
 
 # IMPORTANTE:
 # Use um client ID único para não derrubar ESP32, dashboard ou Node-RED.
-MQTT_CLIENT_ID = "greenhealth_ia_planilha_real_001"
+MQTT_CLIENT_ID = f"greenhealth_ia_{random.randint(10000, 99999)}"
 
-TOPICO_SENSORES = "greenhealth/sensores/dados"
+TOPICO_SENSORES_JSON = "greenhealth/sensores/dados"
+
+# Assina todos os tópicos do GreenHealth para conseguir ver os envios individuais
+# e o JSON agregado. A IA só PROCESSA o JSON completo em TOPICO_SENSORES_JSON.
+TOPICO_SENSORES = "greenhealth/#"
+
+# A IA só vai processar/publicar retorno no DashboardIA a cada 5 segundos.
+INTERVALO_RETORNO_IA_SEG = 5
+
+# A IA pode receber os sensores de duas formas:
+# 1) JSON agregado: greenhealth/sensores/dados -> {"plantas": [...]}
+# 2) Tópicos individuais: greenhealth/planta1/ldr, greenhealth/planta1/umidade, etc.
+#
+# Ela monta/guarda o último payload válido e republica a análise
+# a cada INTERVALO_RETORNO_IA_SEG segundos.
+ultimo_payload_sensores: Optional[Dict[str, Any]] = None
+ultimo_topico_sensores: str = TOPICO_SENSORES_JSON
+ultimo_payload_lock = threading.Lock()
+
+# Buffer para montar o JSON a partir dos tópicos individuais.
+buffer_sensores_individuais: Dict[str, Any] = {
+    "plantas": {},
+    "temperatura": None,
+    "umidade_ar": None,
+    "data_hora": None,
+    "ultima_atualizacao": None,
+}
 
 TOPICO_SERVO_BASE = "greenhealth/atuadores"
 TOPICO_DECISOES = "greenhealth/ia/decisoes"
 TOPICO_ALERTAS = "greenhealth/ia/alertas"
 TOPICO_DICAS = "greenhealth/ia/dicas"
+TOPICO_PREVISAO = "greenhealth/ia/previsao"
 TOPICO_STATUS = "greenhealth/ia/status"
 
 
@@ -127,7 +156,7 @@ ANGULO_SERVO_REGA_PADRAO = 90
 ANGULO_SERVO_FECHADO = 0
 
 # Trava para evitar repetir o comando várias vezes em sequência.
-INTERVALO_MINIMO_ENTRE_COMANDOS_SEG = 30
+INTERVALO_MINIMO_ENTRE_COMANDOS_SEG = 1
 
 # Se a umidade estiver MUITO baixa, permite rega emergencial mesmo antes
 # da frequência aproximada terminar.
@@ -206,6 +235,28 @@ def valor_inteiro(valor: Any, padrao: Optional[int] = None) -> Optional[int]:
     if n is None:
         return padrao
     return int(n)
+
+
+def normalizar_lista(valor: Any) -> List[str]:
+    """
+    Converte None/string/lista em lista de strings, removendo vazios.
+    Ajuda a publicar alertas e notificações no formato esperado pelo DashboardIA.
+    """
+    if valor is None:
+        return []
+
+    if isinstance(valor, list):
+        itens = valor
+    else:
+        itens = [valor]
+
+    saida: List[str] = []
+    for item in itens:
+        texto = str(item).strip()
+        if texto:
+            saida.append(texto)
+
+    return saida
 
 
 def remover_codigo_inicial(texto: Any) -> str:
@@ -664,13 +715,28 @@ class AgenteGreenHealthIA:
             "ultimos_comandos": {}
         })
 
-    def publicar_json(self, topico: str, dados: Dict[str, Any], retain: bool = False) -> None:
-        self.client.publish(
+    def publicar_json(self, topico: str, dados: Dict[str, Any], retain: bool = True) -> None:
+        """
+        Publica JSON para o DashboardIA com QoS 1 e retain por padrão.
+
+        O retain ajuda quando o DashboardIA é aberto depois da IA processar:
+        ele recebe a última decisão/alerta/dica/previsão salva no broker.
+        """
+        payload = json.dumps(dados, ensure_ascii=False)
+
+        info = self.client.publish(
             topico,
-            json.dumps(dados, ensure_ascii=False),
-            qos=0,
+            payload,
+            qos=1,
             retain=retain
         )
+
+        try:
+            info.wait_for_publish(timeout=2)
+            if info.rc != mqtt.MQTT_ERR_SUCCESS:
+                print(f"[ERRO MQTT] Falha ao publicar em {topico}. Código: {info.rc}")
+        except Exception as e:
+            print(f"[ERRO MQTT] Publicação não confirmada em {topico}: {e}")
 
     def publicar_status(self, status: str, extra: Optional[Dict[str, Any]] = None) -> None:
         dados = {
@@ -985,6 +1051,151 @@ class AgenteGreenHealthIA:
             "confianca_parametro": perfil["confianca"],
         }
 
+
+    def gerar_previsao_dashboard(self, decisao: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Gera um payload simples no formato que o DashboardIA minimalista espera
+        no tópico greenhealth/ia/previsao.
+        """
+        nome = decisao.get("nome") or "Planta"
+        vaso = decisao.get("vaso")
+        regar = decisao.get("regar") is True or decisao.get("acao") == "regar"
+
+        seguranca = decisao.get("seguranca") or {}
+        bloqueado_por_dias = seguranca.get("bloqueado_por_dias") is True
+        dias_desde_ultima_rega = seguranca.get("dias_desde_ultima_rega")
+        limites = decisao.get("limites_usados") or {}
+        dias_entre_regas = limites.get("dias_entre_regas")
+
+        if regar:
+            previsao = "Rega recomendada agora."
+        elif bloqueado_por_dias and dias_desde_ultima_rega is not None and dias_entre_regas is not None:
+            try:
+                restante = max(0.0, float(dias_entre_regas) - float(dias_desde_ultima_rega))
+                horas = restante * 24.0
+                if horas < 1:
+                    previsao = "Próxima rega pode ser reavaliada em menos de 1 hora."
+                elif horas < 24:
+                    previsao = f"Próxima rega pode ser reavaliada em cerca de {horas:.0f} hora(s)."
+                else:
+                    previsao = f"Próxima rega pode ser reavaliada em cerca de {restante:.1f} dia(s)."
+            except Exception:
+                previsao = "Rega não recomendada agora por causa da frequência da planilha."
+        else:
+            previsao = "Sem rega recomendada agora. Continue monitorando."
+
+        return {
+            "tipo": "previsao_ia_greenhealth",
+            "data_hora": agora_iso(),
+            "vaso": vaso,
+            "id_planilha": decisao.get("id_planilha"),
+            "nome": nome,
+            "previsao": previsao,
+            "previsao_proxima_rega": previsao,
+            "mensagem": previsao,
+        }
+
+    def preparar_decisao_para_dashboard(self, decisao: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Mantém todos os dados técnicos da decisão, mas adiciona campos resumidos
+        para o DashboardIA minimalista.
+
+        O DashboardIA atual entende principalmente:
+        - greenhealth/ia/decisoes: decisão principal por planta
+        - greenhealth/ia/alertas: alerta principal por planta
+        - greenhealth/ia/dicas: pontos de atenção/notificações
+        - greenhealth/ia/previsao: próxima ação
+        """
+        alertas = normalizar_lista(decisao.get("alertas"))
+        dicas = normalizar_lista(decisao.get("dicas"))
+        motivos_rega = normalizar_lista(decisao.get("motivos_rega"))
+
+        pontos_atencao: List[str] = []
+        for item in list(motivos_rega) + list(alertas) + list(dicas):
+            texto = str(item).strip() if item is not None else ""
+            if texto and texto not in pontos_atencao:
+                pontos_atencao.append(texto)
+            if len(pontos_atencao) >= 2:
+                break
+
+        regar = decisao.get("regar") is True or decisao.get("acao") == "regar"
+        decisao_resumida = (
+            "A IA recomenda regar esta planta."
+            if regar
+            else "A IA recomenda apenas monitorar agora."
+        )
+
+        alerta_principal = alertas[0] if alertas else "Sem alerta no momento."
+        previsao = self.gerar_previsao_dashboard(decisao)["previsao"]
+
+        if not pontos_atencao:
+            pontos_atencao = [previsao]
+
+        decisao["decisao_resumida"] = decisao_resumida
+        decisao["alerta_principal"] = alerta_principal
+        decisao["pontos_atencao"] = pontos_atencao[:2]
+        decisao["previsao_proxima_rega"] = previsao
+
+        # Campo genérico de notificação para logs/depuração e futuras telas.
+        if regar:
+            notificacao = f"{decisao.get('nome', 'Planta')}: rega recomendada agora."
+            tipo_notificacao = "rega"
+        elif alerta_principal != "Sem alerta no momento.":
+            notificacao = f"{decisao.get('nome', 'Planta')}: {alerta_principal}"
+            tipo_notificacao = "alerta"
+        else:
+            notificacao = f"{decisao.get('nome', 'Planta')}: monitoramento normal."
+            tipo_notificacao = "monitoramento"
+
+        decisao["notificacao"] = notificacao
+        decisao["tipo_notificacao"] = tipo_notificacao
+
+        return decisao
+
+    def gerar_payload_alerta_dashboard(self, decisao: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Gera um payload próprio para greenhealth/ia/alertas.
+        Mesmo sem alerta crítico, publica 'Sem alerta no momento' para manter
+        o card da planta atualizado no DashboardIA.
+        """
+        alerta = decisao.get("alerta_principal") or "Sem alerta no momento."
+
+        return {
+            "tipo": "alerta_ia_greenhealth",
+            "data_hora": agora_iso(),
+            "vaso": decisao.get("vaso"),
+            "id_planilha": decisao.get("id_planilha"),
+            "nome": decisao.get("nome"),
+            "alerta_principal": alerta,
+            "alertas": [alerta],
+            "mensagem": alerta,
+            "notificacao": decisao.get("notificacao"),
+            "tipo_notificacao": decisao.get("tipo_notificacao"),
+        }
+
+    def gerar_payload_dicas_dashboard(self, decisao: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Gera um payload próprio para greenhealth/ia/dicas.
+        O DashboardIA usa as dicas como pontos de atenção/notificações.
+        """
+        pontos = normalizar_lista(decisao.get("pontos_atencao"))[:2]
+
+        if not pontos:
+            pontos = [decisao.get("previsao_proxima_rega") or "Continue monitorando esta planta."]
+
+        return {
+            "tipo": "notificacao_ia_greenhealth",
+            "data_hora": agora_iso(),
+            "vaso": decisao.get("vaso"),
+            "id_planilha": decisao.get("id_planilha"),
+            "nome": decisao.get("nome"),
+            "dicas": pontos,
+            "pontos_atencao": pontos,
+            "mensagem": pontos[0],
+            "notificacao": decisao.get("notificacao"),
+            "tipo_notificacao": decisao.get("tipo_notificacao"),
+        }
+
     def processar_payload_sensores(self, payload: Dict[str, Any]) -> None:
         if not isinstance(payload, dict):
             print("[WARN] Payload ignorado: não é objeto JSON.")
@@ -1003,23 +1214,30 @@ class AgenteGreenHealthIA:
                 continue
 
             decisao = self.avaliar_planta(leitura, payload)
+            decisao = self.preparar_decisao_para_dashboard(decisao)
+            alerta_dashboard = self.gerar_payload_alerta_dashboard(decisao)
+            dica_dashboard = self.gerar_payload_dicas_dashboard(decisao)
+            previsao = self.gerar_previsao_dashboard(decisao)
 
+            # Formato principal esperado pelo DashboardIA minimalista.
             self.publicar_json(TOPICO_DECISOES, decisao)
 
-            if decisao.get("alertas"):
-                self.publicar_json(TOPICO_ALERTAS, decisao)
+            # Sempre publica alerta e notificação/dica por planta.
+            # Assim o DashboardIA atualiza os cards mesmo quando não há alerta crítico.
+            self.publicar_json(TOPICO_ALERTAS, alerta_dashboard)
+            self.publicar_json(TOPICO_DICAS, dica_dashboard)
 
-            if decisao.get("dicas"):
-                self.publicar_json(TOPICO_DICAS, decisao)
+            # Próxima ação/previsão mostrada no card de cada planta.
+            self.publicar_json(TOPICO_PREVISAO, previsao)
 
             print(
-                f"[IA] Vaso {decisao.get('vaso')} | "
-                f"ID planilha {decisao.get('id_planilha')} | "
-                f"{decisao.get('nome')} | ação: {decisao.get('acao')}"
+                f"[IA -> DashboardIA] Vaso {decisao.get('vaso')} | "
+                f"{decisao.get('nome')} | decisão: {decisao.get('acao')}"
             )
-
-            for alerta in decisao.get("alertas", []):
-                print(f"  ALERTA: {alerta}")
+            print(f"  Decisão: {decisao.get('decisao_resumida')}")
+            print(f"  Alerta: {alerta_dashboard.get('mensagem')}")
+            print(f"  Notificação: {dica_dashboard.get('mensagem')}")
+            print(f"  Próxima ação: {previsao.get('previsao')}")
 
             if decisao.get("regar") is True:
                 id_vaso = valor_inteiro(decisao.get("vaso"))
@@ -1037,6 +1255,117 @@ class AgenteGreenHealthIA:
                     self.registrar_rega(id_vaso)
                 else:
                     print("[SIMULAÇÃO] Rega automática desligada. Nenhum servo foi acionado.")
+
+
+
+
+def atualizar_payload_por_topico_individual(topico: str, texto: str) -> bool:
+    """
+    Atualiza o buffer interno usando tópicos individuais do mock/ESP32.
+
+    Exemplos aceitos:
+    - greenhealth/planta1/ldr -> 2887
+    - greenhealth/planta1/umidade -> 936
+    - greenhealth/planta1/umidade_solo -> 936
+    - greenhealth/planta1/servo/angulo -> 0
+    - greenhealth/sensores/temperatura -> 28.25
+    - greenhealth/sensores/umidade_ar -> 83.91
+    - greenhealth/sensores/data_hora -> 08/07/2026 22:50:39
+
+    Retorna True quando conseguiu aproveitar o tópico.
+    """
+    global ultimo_payload_sensores, ultimo_topico_sensores
+
+    valor_texto = texto.strip()
+    agora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
+    # Sensores gerais
+    if topico == "greenhealth/sensores/temperatura":
+        with ultimo_payload_lock:
+            buffer_sensores_individuais["temperatura"] = valor_numero(valor_texto)
+            buffer_sensores_individuais["ultima_atualizacao"] = agora
+            montar_payload_individual_locked(topico)
+        return True
+
+    if topico == "greenhealth/sensores/umidade_ar":
+        with ultimo_payload_lock:
+            buffer_sensores_individuais["umidade_ar"] = valor_numero(valor_texto)
+            buffer_sensores_individuais["ultima_atualizacao"] = agora
+            montar_payload_individual_locked(topico)
+        return True
+
+    if topico == "greenhealth/sensores/data_hora":
+        with ultimo_payload_lock:
+            buffer_sensores_individuais["data_hora"] = valor_texto
+            buffer_sensores_individuais["ultima_atualizacao"] = agora
+            montar_payload_individual_locked(topico)
+        return True
+
+    # Sensores por planta
+    m = re.match(r"^greenhealth/planta(\d+)/(ldr|umidade|umidade_solo|servo/angulo|servo/status)$", topico)
+    if not m:
+        return False
+
+    planta_id = int(m.group(1))
+    campo = m.group(2)
+
+    with ultimo_payload_lock:
+        plantas = buffer_sensores_individuais.setdefault("plantas", {})
+        planta = plantas.setdefault(planta_id, {"planta": planta_id})
+
+        if campo == "ldr":
+            planta["ldr"] = valor_numero(valor_texto)
+        elif campo in ["umidade", "umidade_solo"]:
+            # O agente avalia o campo umidade_solo.
+            planta["umidade_solo"] = valor_numero(valor_texto)
+        elif campo == "servo/angulo":
+            planta["angulo_servo"] = valor_numero(valor_texto)
+        elif campo == "servo/status":
+            planta["status_servo"] = valor_texto
+
+        buffer_sensores_individuais["ultima_atualizacao"] = agora
+        montar_payload_individual_locked(topico)
+
+    return True
+
+
+def montar_payload_individual_locked(topico_origem: str) -> None:
+    """
+    Monta ultimo_payload_sensores a partir do buffer individual.
+    Esta função deve ser chamada com ultimo_payload_lock já adquirido.
+    """
+    global ultimo_payload_sensores, ultimo_topico_sensores
+
+    plantas_dict = buffer_sensores_individuais.get("plantas", {})
+    plantas_lista: List[Dict[str, Any]] = []
+
+    for planta_id in sorted(plantas_dict.keys()):
+        planta = dict(plantas_dict[planta_id])
+
+        # Só entra na análise se tiver pelo menos ldr ou umidade_solo.
+        if planta.get("ldr") is None and planta.get("umidade_solo") is None:
+            continue
+
+        plantas_lista.append(planta)
+
+    if not plantas_lista:
+        return
+
+    data_hora = (
+        buffer_sensores_individuais.get("data_hora")
+        or buffer_sensores_individuais.get("ultima_atualizacao")
+        or datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    )
+
+    ultimo_payload_sensores = {
+        "plantas": plantas_lista,
+        "temperatura": buffer_sensores_individuais.get("temperatura"),
+        "umidade_ar": buffer_sensores_individuais.get("umidade_ar"),
+        "data_hora": data_hora,
+        "origem": "topicos_individuais",
+    }
+
+    ultimo_topico_sensores = f"topicos_individuais/{topico_origem}"
 
 
 # =========================================================
@@ -1063,12 +1392,17 @@ def on_connect(client: mqtt.Client, userdata: Any, flags: Any, rc: int) -> None:
         agente.publicar_status("online", {
             "broker": MQTT_BROKER,
             "porta": MQTT_PORT,
-            "topico_sensores": TOPICO_SENSORES,
+            "client_id": MQTT_CLIENT_ID,
+            "topico_assinado": TOPICO_SENSORES,
+            "topico_json_processado": TOPICO_SENSORES_JSON,
             "planilha": base.caminho,
             "modo_automatico_rega": MODO_AUTOMATICO_REGA,
         })
 
+        print(f"[MQTT] Client ID: {MQTT_CLIENT_ID}")
         print(f"[MQTT] Assinando: {TOPICO_SENSORES}")
+        print(f"[MQTT] Lendo tópicos individuais: greenhealth/planta1/..., greenhealth/planta2/..., greenhealth/planta3/...")
+        print(f"[MQTT] Também aceita JSON agregado em: {TOPICO_SENSORES_JSON}")
     else:
         print(f"[MQTT] Falha ao conectar. Código: {rc}")
 
@@ -1079,18 +1413,67 @@ def on_disconnect(client: mqtt.Client, userdata: Any, rc: int) -> None:
 
 
 def on_message(client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage) -> None:
-    try:
-        texto = msg.payload.decode("utf-8", errors="replace")
-        payload = json.loads(texto)
-    except Exception as e:
-        print(f"[ERRO] Mensagem inválida em {msg.topic}: {e}")
+    global ultimo_payload_sensores, ultimo_topico_sensores
+
+    texto = msg.payload.decode("utf-8", errors="replace")
+    topico = msg.topic
+
+    # A IA assina greenhealth/#, mas ignora mensagens da própria IA
+    # e mensagens de atuadores para não entrar em loop.
+    if topico.startswith("greenhealth/ia/"):
         return
 
-    try:
-        agente.processar_payload_sensores(payload)
-    except Exception as e:
-        print(f"[ERRO] Falha ao processar payload: {e}")
+    if topico.startswith("greenhealth/atuadores/"):
+        return
 
+    # 1) Primeiro tenta aproveitar tópicos individuais.
+    # Ex.: greenhealth/planta1/ldr, greenhealth/planta1/umidade,
+    # greenhealth/sensores/temperatura etc.
+    if atualizar_payload_por_topico_individual(topico, texto):
+        return
+
+    # 2) Depois tenta JSON agregado, caso ele também exista.
+    try:
+        payload = json.loads(texto)
+    except Exception:
+        return
+
+    if not (isinstance(payload, dict) and isinstance(payload.get("plantas"), list)):
+        return
+
+    with ultimo_payload_lock:
+        ultimo_payload_sensores = payload
+        ultimo_topico_sensores = topico
+
+
+def loop_retorno_ia() -> None:
+    """
+    Publica a análise da IA a cada 5 segundos usando o último JSON recebido.
+    O terminal mostra somente os retornos enviados ao DashboardIA.
+    """
+    while not encerrando:
+        time.sleep(INTERVALO_RETORNO_IA_SEG)
+
+        with ultimo_payload_lock:
+            payload = ultimo_payload_sensores
+            topico = ultimo_topico_sensores
+
+        if payload is None:
+            print("")
+            print("[IA] Aguardando sensores em greenhealth/planta1/... ou JSON em greenhealth/sensores/dados...")
+            continue
+
+        print("")
+        print("========== RETORNO DA IA PARA O DASHBOARDIA ==========")
+        print(f"Horário: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
+        print(f"Último JSON recebido de: {topico}")
+
+        try:
+            agente.processar_payload_sensores(payload)
+        except Exception as e:
+            print(f"[ERRO] Falha ao processar payload: {e}")
+
+        print("======================================================")
 
 def encerrar(signum: Any = None, frame: Any = None) -> None:
     global encerrando
@@ -1130,6 +1513,9 @@ def main() -> None:
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
     client.on_message = on_message
+
+    thread_retorno = threading.Thread(target=loop_retorno_ia, daemon=True)
+    thread_retorno.start()
 
     client.connect(MQTT_BROKER, MQTT_PORT, keepalive=60)
     client.loop_forever()

@@ -2,7 +2,7 @@
 // Usa WSS para evitar bloqueio do navegador por conteúdo inseguro.
 const broker = "wss://broker.emqx.io:8084/mqtt";
 
-const TOPICO_GERAL = "greenhealth/sensores/#";
+const TOPICO_GERAL = "greenhealth/#";
 const TOPICO_DADOS = "greenhealth/sensores/dados";
 const TOPICO_TEMPERATURA = "greenhealth/sensores/temperatura";
 const TOPICO_UMIDADE_AR = "greenhealth/sensores/umidade_ar";
