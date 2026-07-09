@@ -34,11 +34,11 @@
 12. [📥 Tópicos de comando dos servos](#-tópicos-de-comando-dos-servos)
 13. [🤖 Tópicos da IA](#-tópicos-da-ia)
 14. [🧠 Como a IA decide os alertas](#-como-a-ia-decide-os-alertas)
-15. [🗃️ Node-RED e banco de dados](#️-node-red-e-banco-de-dados)
+15. [🗃️ Node-RED e banco de dados](#️%EF%B8%8F-node-red-e-banco-de-dados)
 16. [🚀 Como usar](#-como-usar)
 17. [📌 Estado atual do projeto](#-estado-atual-do-projeto)
 18. [🔮 Próximas melhorias](#-próximas-melhorias)
-19. [👨‍💻 Autor](#-autor)
+19. [👨‍💻 Autor](#%E2%80%8D-autor)
 20. [📄 Licença](#-licença)
 ---
 
