@@ -88,6 +88,8 @@ O sistema permite acompanhar:
 
 ## 🧠 Funcionamento geral
 
+[Clique para acessar -> Vídeo Demonstração de Funcionamento](https://photos.app.goo.gl/anKHz1KUcGXcr5XR8)
+
 O projeto é dividido em três partes principais:
 
 1. **ESP32 com sensores e atuadores**  
