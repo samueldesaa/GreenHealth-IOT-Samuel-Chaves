@@ -104,7 +104,7 @@ O projeto é dividido em três partes principais:
   <img src="assets/Diagrama.png" alt="Diagrama geral de funcionamento do GreenHealth IoT" width="700">
 </p>
 <p align="center">
-  <img src="assets/Irrigacao.gif" alt="Demonstração do sistema de irrigação automatizada com servo" width="700">
+  <img src="assets/Irrigacao.gif" alt="Demonstração do sistema de irrigação automatizada com servo" width="300">
 </p>
 
 
